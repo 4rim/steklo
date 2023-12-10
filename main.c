@@ -1,16 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <dirent.h>
 
 #define MAXPATHLEN 256
 
-#define usage() fprintf(stderr, "Usage: stek <directory>\n")
+#define usage() fprintf(stderr, "Usage: stek <directory> <post title>\n")
 
-void traversedir(char *);
+char *sitedir = "./dummy/";
+
+int traversedir(char *);
 bool ismd(char *, unsigned char);
 int mdtohtml(FILE *, struct dirent *);
 
@@ -24,20 +28,28 @@ int main(int argc, char** argv)
 	char path[MAXPATHLEN];
 	strncpy(path, argv[1], MAXPATHLEN);
 
-	traversedir(path);
+	/* 
+	char postname[MAXPATHLEN];
+	strncpy(path, argv[1], MAXPATHLEN);
+	*/
+
+	if(traversedir(path) != 0){
+		perror("traversedir");
+		return -1;
+	}
 
 	return 0;
 }
 
 /* Traverse files in dir 'path'. Ignores symlinks, pipes, devices, socks */
-void traversedir(char path[MAXPATHLEN])
+int traversedir(char path[MAXPATHLEN])
 {
 	DIR* dir;
 	struct dirent *ent;
 
 	if((dir = opendir(path)) == NULL){
 		perror(path);
-		return;
+		return -1;
 	}
 
 	while((ent = readdir(dir)) != NULL){ /* NULL means end of directory */
@@ -63,10 +75,9 @@ void traversedir(char path[MAXPATHLEN])
 			 * concatenating directory names, it's very verbose right now. */
 			/* printf("%s\n", ent->d_name); */
 			FILE* f;
-			char *dummydir = "./dummy/";
 			char *dname = ent->d_name;
-			char *concat = malloc(strlen(dummydir) + strlen(dname) + 1);
-			memcpy(concat, dummydir, strlen(dummydir));
+			char *concat = malloc(strlen(sitedir) + strlen(dname) + 1);
+			memcpy(concat, sitedir, strlen(sitedir));
 			strcat(concat, dname);
 			if ((f = fopen(concat, "r+"))){
 				mdtohtml(f, ent);
@@ -74,10 +85,12 @@ void traversedir(char path[MAXPATHLEN])
 			}
 			else {
 				perror("Could not return a file stream");
-				return;
+				free(concat);
+				return -1;
 			}
 		}
 	}
+	return 0;
 }
 
 bool ismd(char* name, unsigned char len)
@@ -95,6 +108,5 @@ bool ismd(char* name, unsigned char len)
 int mdtohtml(FILE *f, struct dirent *ent)
 {
 	printf("Converting %s to .html file...\n", ent->d_name);
-	/* Obviously WIP. Could parse here or call a shell script to parse? */
-	return 0;
+	return system("./convert.sh");
 }
