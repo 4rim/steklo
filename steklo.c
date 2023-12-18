@@ -10,7 +10,7 @@
 
 #define MAXPATHLEN 256
 
-#define usage() fprintf(stderr, "Usage: stek <directory> <post title>\n")
+#define usage() fprintf(stderr, "Usage: stek <directory>\n")
 
 char *sitedir = "./dummy/";
 
@@ -27,6 +27,8 @@ int main(int argc, char** argv)
 
 	char path[MAXPATHLEN];
 	strncpy(path, argv[1], MAXPATHLEN);
+
+	path[strlen(path)] = '/';
 
 	/* 
 	char postname[MAXPATHLEN];
@@ -76,8 +78,10 @@ int traversedir(char path[MAXPATHLEN])
 			/* printf("%s\n", ent->d_name); */
 			FILE* f;
 			char *dname = ent->d_name;
-			char *concat = malloc(strlen(sitedir) + strlen(dname) + 1);
-			memcpy(concat, sitedir, strlen(sitedir));
+			// char *concat = malloc(strlen(sitedir) + strlen(dname) + 1);
+			// memcpy(concat, sitedir, strlen(sitedir));
+			char *concat = malloc(strlen(path) + strlen(dname) + 1);
+			memcpy(concat, path, strlen(path));
 			strcat(concat, dname);
 			if ((f = fopen(concat, "r+"))){
 				mdtohtml(f, ent);
@@ -107,6 +111,9 @@ bool ismd(char* name, unsigned char len)
 
 int mdtohtml(FILE *f, struct dirent *ent)
 {
+	/* Should I be using system() here? Is there a more lightweight function?
+	 * */
+
 	printf("Converting %s to .html file...\n", ent->d_name);
-	return system("./convert.sh");
+	return system("~/projects/steklo/convert.sh");
 }
