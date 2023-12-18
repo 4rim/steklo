@@ -12,7 +12,7 @@
 
 #define usage() fprintf(stderr, "Usage: stek <directory>\n")
 
-char *sitedir = "./dummy/";
+/* char *sitedir = "./dummy/"; */
 
 int traversedir(char *);
 bool ismd(char *, unsigned char);
