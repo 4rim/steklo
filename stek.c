@@ -7,12 +7,14 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <dirent.h>
+#include <time.h>
+#include <utime.h>
 
 #define MAXPATHLEN 256
+#define usage() fprintf(stderr, "Usage: stek <directory> (no trailing slash!)\n")
+#define TIMEOFFSET 60
 
-#define usage() fprintf(stderr, "Usage: stek <directory>\n")
-
-/* char *sitedir = "./dummy/"; */
+int currtime;
 
 int traversedir(char *);
 bool ismd(char *, unsigned char);
@@ -25,15 +27,12 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	currtime = time(NULL);
+
 	char path[MAXPATHLEN];
 	strncpy(path, argv[1], MAXPATHLEN);
 
 	path[strlen(path)] = '/';
-
-	/* 
-	char postname[MAXPATHLEN];
-	strncpy(path, argv[1], MAXPATHLEN);
-	*/
 
 	if(traversedir(path) != 0){
 		perror("traversedir");
@@ -69,28 +68,31 @@ int traversedir(char path[MAXPATHLEN])
 			continue;
 
 		if(ent->d_type == DT_REG && ismd(ent->d_name, ent->d_namlen)){
-			/* TODO: Obviously have to edit a lot here (make another function
-			 * to manipulate the files, run parse scripts or parse directly,
-			 * etc. 
-			 * Make it generalizable across different directories, recurse
-			 * over directories, etc. Probably a better way to deal with
-			 * concatenating directory names, it's very verbose right now. */
-			/* printf("%s\n", ent->d_name); */
+			/* TODO: Probably a better way to deal with concatenating directory
+			 * names, it's very verbose right now. */
 			FILE* f;
 			char *dname = ent->d_name;
-			// char *concat = malloc(strlen(sitedir) + strlen(dname) + 1);
-			// memcpy(concat, sitedir, strlen(sitedir));
 			char *concat = malloc(strlen(path) + strlen(dname) + 1);
 			memcpy(concat, path, strlen(path));
 			strcat(concat, dname);
-			if ((f = fopen(concat, "r+"))){
+
+			struct stat currfile;
+			if (stat(concat, &currfile) < 0){
+				perror("stat");
+				return 1;
+			}
+
+			/* Only converts files that have been modified within 1 minute
+			 * of running stek. */
+			if ((currfile.st_atimespec.tv_sec > (currtime-TIMEOFFSET)) &&
+					(f = fopen(concat, "r+"))){
 				mdtohtml(f, ent);
 				free(concat);
 			}
 			else {
-				perror("Could not return a file stream");
+				// perror("Could not return a file stream");
 				free(concat);
-				return -1;
+				return 0;
 			}
 		}
 	}
@@ -111,9 +113,7 @@ bool ismd(char* name, unsigned char len)
 
 int mdtohtml(FILE *f, struct dirent *ent)
 {
-	/* Should I be using system() here? Is there a more lightweight function?
-	 * */
-
+	/* Should I be using system() here? Is there a more lightweight function? */
 	printf("Converting %s to .html file...\n", ent->d_name);
 	return system("~/projects/steklo/convert.sh");
 }

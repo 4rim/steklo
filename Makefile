@@ -1,7 +1,7 @@
 CC=clang
 CFLAGS=-Wall -Wpedantic -std=c11 -g
 
-steklo: steklo.c
+stek: stek.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
