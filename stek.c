@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <utime.h>
+#include "html.h"
 
 #define MAXPATHLEN 256
 #define usage() fprintf(stderr, "Usage: stek <directory> (no trailing slash!)\n")
@@ -82,17 +83,21 @@ int traversedir(char path[MAXPATHLEN])
 				return 1;
 			}
 
+			/* printf("when you ran stek: %d\n", currtime);
+			printf("when %s was last modified: %ld\n", dname, currfile.st_atimespec.tv_sec); */
+
 			/* Only converts files that have been modified within 1 minute
 			 * of running stek. */
-			if ((currfile.st_atimespec.tv_sec > (currtime-TIMEOFFSET)) &&
-					(f = fopen(concat, "r+"))){
+			if ((((currtime) - currfile.st_atimespec.tv_sec) < TIMEOFFSET) &&
+					(f = fopen(concat, "r+"))){ 
 				mdtohtml(f, ent);
 				free(concat);
 			}
+			
+			/* Skip file, it hasn't been touched within the last minute */
 			else {
-				// perror("Could not return a file stream");
 				free(concat);
-				return 0;
+				continue;
 			}
 		}
 	}
@@ -113,7 +118,9 @@ bool ismd(char* name, unsigned char len)
 
 int mdtohtml(FILE *f, struct dirent *ent)
 {
+	char buffer[MAXPATHLEN];
 	/* Should I be using system() here? Is there a more lightweight function? */
 	printf("Converting %s to .html file...\n", ent->d_name);
-	return system("~/projects/steklo/convert.sh");
+	snprintf(buffer, sizeof(buffer), "~/projects/steklo/convert.sh %s", ent->d_name);
+	return system(buffer);
 }
