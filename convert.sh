@@ -36,10 +36,10 @@ read id
 echo "What would you like your post's title to be?"
 read title
 
-# This is BSD sed
-sed -i '' 's/<!-- ID -->/'$id'/g' $newname.html && exit 1
-sed -i '' 's/<!-- TITLE -->/'$title'/g' $newname.html && exit 1
-sed -i '' 's/<!-- DATE -->/'$(echo $(date +%d.%m.%y_%H:%M:%S))'/g' $newname.html && exit 1
+# This is BSD sed, so need to have the '' after the flag
+sed -i '' 's/<!-- ID -->/'$id'/g' $newname.html || exit 1
+sed -i '' 's/<!-- TITLE -->/'$title'/g' $newname.html || exit 1
+sed -i '' 's/<!-- DATE -->/'$(echo $(date +%d.%m.%y-%H:%M:%S))'/g' $newname.html || exit 1
 
 printf "%s\n" "/<!-- POST -->/a" "$(cat $newname.html)" . w | ed -s $currblog
 
