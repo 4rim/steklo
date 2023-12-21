@@ -10,12 +10,12 @@ xmlfile="/Users/forest/Downloads/neocities-iwillneverbehappy/feed.xml"
 tmp=".tmp.txt"
 blogurl="https://iwillneverbehappy.neocities.org/blog23#";
 
-if [[ $(pwd) == $postdir ]]
-then
-	continue
-else
-	cd $postdir
-fi
+# if [[ $(pwd) == $postdir ]]
+# then
+# 	continue
+# else
+# 	cd $postdir
+# fi
 
 newname=$(echo "$1" | cut -d"." -f 1)
 echo $newname
@@ -42,6 +42,7 @@ echo "Input a short description for the RSS item:"
 read description
 
 currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
+currday="$(date '+%d')"
 
 # This is BSD sed, so need to have the '' after the flag
 sed -i '' 's/<!-- ID -->/'$id'/g' $newname.html || exit 1
@@ -63,6 +64,17 @@ echo '
 printf "%s\n" "/<!-- ITEM -->/a" "$(cat $tmp)" . w | ed -s $xmlfile
 
 rm -i $tmp
+
+# For sidebar
+touch $tmp
+
+echo '
+					<li><a href="'$id'">'$title'</a> '$currday'</li>
+					' > $tmp
+printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog
+
+rm -i $tmp
+
 
 exit 0
 
