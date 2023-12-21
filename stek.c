@@ -40,8 +40,6 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	printf("There are either no .md files to convert, or there are no newly edited files. Quitting.\n");
-
 	return 0;
 }
 

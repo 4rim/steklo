@@ -70,7 +70,7 @@ touch $tmp
 
 # 5 tabs. lol
 echo '
-					<li><a href="'$id'">'$title'</a> '$currday'</li>' > $tmp
+					<li><a href="#'$id'">'$title'</a> '$currday'</li>' > $tmp
 
 printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog
 rm -i $tmp
