@@ -15,6 +15,12 @@ should do. Pandoc is a Haskell library and command-line tool that enables
 quick translation from one markup format to another. It is used here to 
 convert Markdown to HTML files.
 
+## TODO
+
+- Decide on the directories situation because it's quite disorganized at the
+  moment.
+- (One day) remove dependency on pandoc and make this entirely a shell script; I feel like it wants to be a shell script instead of this amalgamation of C and zsh and pandoc...
+
 ## Few notes for myself
 
 Ultimately what steklo does is let me write all my posts in Markdown and
