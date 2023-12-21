@@ -10,12 +10,13 @@ xmlfile="/Users/forest/Downloads/neocities-iwillneverbehappy/feed.xml"
 tmp=".tmp.txt"
 blogurl="https://iwillneverbehappy.neocities.org/blog23#";
 
-# if [[ $(pwd) == $postdir ]]
-# then
-# 	continue
-# else
-# 	cd $postdir
-# fi
+
+if [[ $(pwd) == $postdir ]]
+then
+ 	continue
+else
+	cd $postdir
+fi
 
 newname=$(echo "$1" | cut -d"." -f 1)
 echo $newname
@@ -23,9 +24,9 @@ if [[ ! -d "$newname.html" ]]; then
 	touch "$newname.html"
 fi
 
-echo $header > "$newname.html"
-pandoc "$1" >> "$newname.html"
-echo $footer >> "$newname.html"
+echo $header > "$postdir$newname.html"
+pandoc "$1" >> "$postdir$newname.html"
+echo $footer >> "$postdir$newname.html"
 
 echo "Stay in draft mode or publish to main file? [y = publish, n = draft]"
 read ans
@@ -38,18 +39,16 @@ echo "What would you like your post's ID to be?"
 read id
 echo "What would you like your post's title to be?"
 read title
-echo "Input a short description for the RSS item:"
-read description
 
 currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
 currday="$(date '+%d')"
 
 # This is BSD sed, so need to have the '' after the flag
-sed -i '' 's/<!-- ID -->/'$id'/g' $newname.html || exit 1
-sed -i '' 's/<!-- TITLE -->/'$title'/g' $newname.html || exit 1
-sed -i '' 's/<!-- DATE -->/'$currdate'/g' $newname.html || exit 1
+sed -i '' 's/<!-- ID -->/'$id'/g' $postdir$newname.html || exit 1
+sed -i '' 's/<!-- TITLE -->/'$title'/g' $postdir$newname.html || exit 1
+sed -i '' 's/<!-- DATE -->/'$currdate'/g' $postdir$newname.html || exit 1
 
-printf "%s\n" "/<!-- POST -->/a" "$(cat $newname.html)" . w | ed -s $currblog
+printf "%s\n" "/<!-- POST -->/a" "$(cat $postdir$newname.html)" . w | ed -s $currblog
 
 # For RSS, feed.xml
 touch $tmp
@@ -59,8 +58,9 @@ echo '
 			<title>'$title'</title>
 			<pubDate>'$currdate'</pubDate>
 			<link>'$blogurl$id'</link>
-			<description><![CDATA['$description']]></description>
+			<description><![CDATA['$(cat $postdir$newname.html)']]></description>
 		</item>' > $tmp
+
 printf "%s\n" "/<!-- ITEM -->/a" "$(cat $tmp)" . w | ed -s $xmlfile
 
 rm -i $tmp
@@ -68,13 +68,19 @@ rm -i $tmp
 # For sidebar
 touch $tmp
 
+# 5 tabs. lol
 echo '
-					<li><a href="'$id'">'$title'</a> '$currday'</li>
-					' > $tmp
-printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog
+					<li><a href="'$id'">'$title'</a> '$currday'</li>' > $tmp
 
+printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog
 rm -i $tmp
 
+echo "Do you wish to publish to Neocities? [y/n]"
+read pub
+
+if [[ $pub == "y" ]]; then
+	neocities upload $currblog $xmlfile
+fi
 
 exit 0
 
