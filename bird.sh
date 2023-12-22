@@ -78,7 +78,7 @@ echo '
 		<item>
 			<title>'$title'</title>
 			<pubDate>'$currdate'</pubDate>
-			<link>'$blogurl'#'$urlname'</link>
+			<link>'$blogurl''$urlname'</link>
 			<description><![CDATA['$(cat $newname.html)']]></description>
 		</item>' > $tmp
 
@@ -90,7 +90,9 @@ echo "Would you like to upload this post to Neocities (y/n)?"
 read uploadans
 
 if [[ $uploadans == "y" ]]; then
-	neocities upload $newname.html $xmlfile $birdnest
+	neocities upload $newname.html &&
+	neocities upload $xmlfile &&
+	neocities upload $birdnest
 fi
 
 exit
