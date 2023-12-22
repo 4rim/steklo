@@ -1,21 +1,31 @@
 #! /usr/bin/env zsh
 
 set -e
-postdir="/Users/forest/Downloads/neocities-iwillneverbehappy/blog/"
+
+birdpath="/Users/forest/projects/steklo/bird.sh"
+sitedir="/Users/forest/Downloads/neocities-iwillneverbehappy/"
+birddir=$sitedir"bird-nest"
+blogdir=$sitedir"blog"
 templatefile="./template.html"
 header="<div class=\"article\">\n<h2 id=\"<!-- ID -->\" style=\"margin-bottom:1px;\"><!-- TITLE -->\n<div class=\"when\"><!-- DATE --></div></h2>"
 footer="</div>"
-currblog="/Users/forest/Downloads/neocities-iwillneverbehappy/blog23.html"
-xmlfile="/Users/forest/Downloads/neocities-iwillneverbehappy/feed.xml"
-tmp=".tmp.txt"
+currblog=$sitedir"/blog23.html"
+xmlfile=$sitedir"/feed.xml"
+tmp=$blogdir".tmp.txt"
 blogurl="https://iwillneverbehappy.neocities.org/blog23#";
 
+currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
+currday="$(date '+%d')"
 
-if [[ $(pwd) == $postdir ]]
+if [[ $(pwd) == $blogdir ]]
 then
  	continue
+elif
+	[[ $(pwd) == $birddir ]]
+	then
+		cd $birddir && source $birdpath $1
 else
-	cd $postdir
+	echo "Where are we?" && exit 1
 fi
 
 newname=$(echo "$1" | cut -d"." -f 1)
@@ -39,9 +49,6 @@ echo "What would you like your post's ID to be?"
 read id
 echo "What would you like your post's title to be?"
 read title
-
-currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
-currday="$(date '+%d')"
 
 # This is BSD sed, so need to have the '' after the flag
 sed -i '' 's/<!-- ID -->/'$id'/g' $postdir$newname.html || (echo "Can't find ID anchor" && exit 1)
