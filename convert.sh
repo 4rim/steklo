@@ -44,11 +44,11 @@ currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
 currday="$(date '+%d')"
 
 # This is BSD sed, so need to have the '' after the flag
-sed -i '' 's/<!-- ID -->/'$id'/g' $postdir$newname.html || exit 1
-sed -i '' 's/<!-- TITLE -->/'$title'/g' $postdir$newname.html || exit 1
-sed -i '' 's/<!-- DATE -->/'$currdate'/g' $postdir$newname.html || exit 1
+sed -i '' 's/<!-- ID -->/'$id'/g' $postdir$newname.html || (echo "Can't find ID anchor" && exit 1)
+sed -i '' 's/<!-- TITLE -->/'$title'/g' $postdir$newname.html || (echo "Can't find TITLE anchor" && exit 1)
+sed -i '' 's/<!-- DATE -->/'$currdate'/g' $postdir$newname.html || (echo "Can't find DATE anchor" && exit 1)
 
-printf "%s\n" "/<!-- POST -->/a" "$(cat $postdir$newname.html)" . w | ed -s $currblog
+(printf "%s\n" "/<!-- POST -->/a" "$(cat $postdir$newname.html)" . w | ed -s $currblog) || (echo "Can't find POST anchor" && exit 1)
 
 # For RSS, feed.xml
 touch $tmp
@@ -61,7 +61,7 @@ echo '
 			<description><![CDATA['$(cat $postdir$newname.html)']]></description>
 		</item>' > $tmp
 
-printf "%s\n" "/<!-- ITEM -->/a" "$(cat $tmp)" . w | ed -s $xmlfile
+(printf "%s\n" "/<!-- ITEM -->/a" "$(cat $tmp)" . w | ed -s $xmlfile) || (echo "Can't find ITEM anchor" && exit 1)
 
 rm -i $tmp
 
@@ -72,7 +72,7 @@ touch $tmp
 echo '
 					<li><a href="#'$id'">'$title'</a> '$currday'</li>' > $tmp
 
-printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog
+(printf "%s\n" "/<!-- SIDE -->/a" "$(cat $tmp)" . w | ed -s $currblog) || (echo "Can't find SIDE anchor" && exit 1)
 rm -i $tmp
 
 echo "Do you wish to publish to Neocities? [y/n]"
