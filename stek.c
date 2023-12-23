@@ -68,6 +68,7 @@ int traversedir(char path[MAXPATHLEN])
 		if(isdir)
 			continue;
 
+	#if defined(__APPLE__) && defined(__MACH__)
 		if(ent->d_type == DT_REG && ismd(ent->d_name, ent->d_namlen)){
 			/* TODO: Probably a better way to deal with concatenating directory
 			 * names, it's very verbose right now. */
@@ -79,13 +80,10 @@ int traversedir(char path[MAXPATHLEN])
 
 			struct stat currfile;
 			if (stat(concat, &currfile) < 0){
+				free(concat);
 				perror("stat");
 				return 1;
 			}
-
-			/* printf("when you ran stek: %d\n", currtime);
-			printf("when %s was last modified: %ld\n", dname, currfile.st_atimespec.tv_sec); */
-
 			/* Only converts files that have been modified within 1 minute
 			 * of running stek. */
 			if ((((currtime) - currfile.st_atimespec.tv_sec) < TIMEOFFSET) &&
@@ -93,6 +91,35 @@ int traversedir(char path[MAXPATHLEN])
 				mdtohtml(f, ent);
 				free(concat);
 			}
+
+	#else // linux
+		int len = strlen(ent->d_name);
+		if(ent->d_type == DT_REG && ismd(ent->d_name, len)){
+			/* TODO: Probably a better way to deal with concatenating directory
+			 * names, it's very verbose right now. */
+			FILE* f;
+			char *dname = ent->d_name;
+			char *concat = malloc(strlen(path) + strlen(dname) + 1);
+			memcpy(concat, path, strlen(path));
+			strcat(concat, dname);
+
+			struct stat currfile;
+			if (stat(concat, &currfile) < 0){
+				free(concat);
+				perror("stat");
+				return 1;
+			}
+			/* Only converts files that have been modified within 1 minute
+			 * of running stek. */
+			if ((((currtime) - currfile.st_atime) < TIMEOFFSET) &&
+					(f = fopen(concat, "r+"))){ 
+				mdtohtml(f, ent);
+				free(concat);
+			}
+	#endif
+
+			/* printf("when you ran stek: %d\n", currtime);
+			printf("when %s was last modified: %ld\n", dname, currfile.st_atimespec.tv_sec); */
 			
 			/* Skip file, it hasn't been touched within the last minute */
 			else {
