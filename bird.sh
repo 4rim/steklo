@@ -1,5 +1,6 @@
-blogdir="/Users/forest/Downloads/neocities-iwillneverbehappy/"
-blogurl="https://iwillneverbehappy.neocities.org/"
+# blogdir="/Users/forest/Downloads/neocities-iwillneverbehappy/"
+blogdir="/home/arim/downloads/neocities-iwillneverbehappy/"
+blogurl="https://marmeru.xyz/"
 tmp=$blogdir".tmp.txt"
 xmlfile=$blogdir"feed.xml"
 birdnest=$blogdir"bird-nest.html"
@@ -17,7 +18,7 @@ header="<!DOCTYPE html>
 			<nav>
 				<div class=\"left\">
 			<a href=\"./index.html\">index</a> |
-			<strong><a href=\"./blog23.html\">blog</a></strong> |
+			<strong><a href=\"./blog24.html\">blog</a></strong> |
 			<a href=\"./art.html\">art</a> |
 			<a href=\"./about.html\">about</a> |
 			<a href=\"../bird-nest.html\">misc</a>
@@ -65,9 +66,9 @@ entry="
 
 # Had to use awk instead of sed due to getting stuck on passing
 # shell variables into sed. Well, if it works it works?
-(awk -v r="$title" '{gsub(/<\!-- TITLE -->/,r)}1' $newname.html > tmp && mv tmp $newname.html) || (echo "Error with replacing <!-- TITLE -->" && exit 1)
+(awk -v r="$title" '{gsub(/<!-- TITLE -->/,r)}1' $newname.html > tmp && mv tmp $newname.html) || (echo "Error with replacing <!-- TITLE -->" && exit 1)
 
-(awk -v r="$currdate" '{gsub(/<\!-- DATE -->/,r)}1' $newname.html > tmp && mv tmp $newname.html) || (echo "Error with replacing <!-- DATE -->" && exit 1)
+(awk -v r="$currdate" '{gsub(/<!-- DATE -->/,r)}1' $newname.html > tmp && mv tmp $newname.html) || (echo "Error with replacing <!-- DATE -->" && exit 1)
 
 (printf "%s\n" "/<!-- ENTRY -->/a" "$(echo $entry)" . w | ed -s $birdnest) || (echo "Can't find ENTRY anchor" && exit 1)
 

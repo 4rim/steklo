@@ -75,6 +75,7 @@ int traversedir(char path[MAXPATHLEN])
 			FILE* f;
 			char *dname = ent->d_name;
 			char *concat = malloc(strlen(path) + strlen(dname) + 1);
+			memset(concat, 0, strlen(concat));
 			memcpy(concat, path, strlen(path));
 			strcat(concat, dname);
 
@@ -100,6 +101,7 @@ int traversedir(char path[MAXPATHLEN])
 			FILE* f;
 			char *dname = ent->d_name;
 			char *concat = malloc(strlen(path) + strlen(dname) + 1);
+			memset(concat, 0, strlen(concat));
 			memcpy(concat, path, strlen(path));
 			strcat(concat, dname);
 
@@ -148,6 +150,6 @@ int mdtohtml(FILE *f, struct dirent *ent)
 	char buffer[MAXPATHLEN];
 	/* Should I be using system() here? Is there a more lightweight function? */
 	printf("Converting %s to .html file...\n", ent->d_name);
-	snprintf(buffer, sizeof(buffer), "~/projects/steklo/convert.sh %s", ent->d_name);
+	snprintf(buffer, sizeof(buffer), "~/steklo/convert.sh %s", ent->d_name);
 	return system(buffer);
 }

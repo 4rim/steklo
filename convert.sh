@@ -1,25 +1,23 @@
-#! /usr/bin/env zsh
+#! /usr/bin/zsh
 
 set -e
-
-birdpath="/Users/forest/projects/steklo/bird.sh"
-sitedir="/Users/forest/Downloads/neocities-iwillneverbehappy/"
+birdpath="/home/arim/steklo/bird.sh"
+sitedir="/home/arim/downloads/neocities-iwillneverbehappy/"
 birddir=$sitedir"bird-nest"
 blogdir=$sitedir"blog"
 templatefile="./template.html"
 header="<div class=\"article\">\n<h2 id=\"<!-- ID -->\" style=\"margin-bottom:1px;\"><!-- TITLE -->\n<div class=\"when\"><!-- DATE --></div></h2>"
 footer="</div>"
-currblog=$sitedir"/blog23.html"
+currblog=$sitedir"/blog24.html"
 xmlfile=$sitedir"/feed.xml"
 tmp=$blogdir".tmp.txt"
-blogurl="https://iwillneverbehappy.neocities.org/blog23#";
+blogurl="https://marmeru.xyz/blog24#";
 
-currdate="$(date '+%a, %d %b %Y %H:%M:%S')"
+currdate="$(date '+%a, %d %b %Y %H:%M:%S %z')"
 currday="$(date '+%d')"
 
 if [[ $(pwd) == $blogdir ]]
 then
- 	continue
 elif
 	[[ $(pwd) == $birddir ]]
 	then
@@ -50,12 +48,13 @@ read id
 echo "What would you like your post's title to be?"
 read title
 
-# This is BSD sed, so need to have the '' after the flag
-sed -i '' 's/<!-- ID -->/'$id'/g' $postdir$newname.html || (echo "Can't find ID anchor" && exit 1)
-sed -i '' 's/<!-- TITLE -->/'$title'/g' $postdir$newname.html || (echo "Can't find TITLE anchor" && exit 1)
-sed -i '' 's/<!-- DATE -->/'$currdate'/g' $postdir$newname.html || (echo "Can't find DATE anchor" && exit 1)
+# (on Mac) this is BSD sed, so need to have the '' after the flag
+# (on Linux) this is GNU sed, so don't need ''
+sed -i 's/<!-- ID -->/'$id'/g' $postdir$newname.html || (echo "Can't find ID anchor" && exit 1)
+sed -i 's/<!-- TITLE -->/'$title'/g' $postdir$newname.html || (echo "Can't find TITLE anchor" && exit 1)
+sed -i 's/<!-- DATE -->/'$currdate'/g' $postdir$newname.html || (echo "Can't find DATE anchor" && exit 1)
 
-(printf "%s\n" "/<!-- POST -->/a" "$(cat $postdir$newname.html)" . w | ed -s $currblog) || (echo "Can't find POST anchor" && exit 1)
+(printf "%s\n" '/<!-- POST -->/a' "$(cat $postdir$newname.html)" . w | ed -s $currblog) || (echo "Can't find POST anchor" && exit 1)
 
 # For RSS, feed.xml
 touch $tmp
@@ -65,10 +64,10 @@ echo '
 			<title>'$title'</title>
 			<pubDate>'$currdate'</pubDate>
 			<link>'$blogurl$id'</link>
-			<description><![CDATA['$(cat $postdir$newname.html)']]></description>
+			<description><![CDATA['$(cat $1)']]></description>
 		</item>' > $tmp
 
-(printf "%s\n" "/<!-- ITEM -->/a" "$(cat $tmp)" . w | ed -s $xmlfile) || (echo "Can't find ITEM anchor" && exit 1)
+(printf "%s\n" '/<!-- ITEM -->/a' "$(cat $tmp)" . w | ed -s $xmlfile) || (echo "Can't find ITEM anchor" && exit 1)
 
 rm -i $tmp
 
