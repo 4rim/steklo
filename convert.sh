@@ -33,8 +33,10 @@ if [[ ! -d "$newname.html" ]]; then
 fi
 
 echo $header > "$postdir$newname.html"
-pandoc "$1" >> "$postdir$newname.html"
+pandoc "$1" | tee -a "$postdir$newname.html" $tmp
 echo $footer >> "$postdir$newname.html"
+
+rm $tmp
 
 echo "Stay in draft mode or publish to main file? [y = publish, n = draft]"
 read ans
@@ -64,7 +66,7 @@ echo '
 			<title>'$title'</title>
 			<pubDate>'$currdate'</pubDate>
 			<link>'$blogurl$id'</link>
-			<description><![CDATA['$(cat $1)']]></description>
+			<description><![CDATA['$(cat temporaryrss.txt)']]></description>
 		</item>' > $tmp
 
 (printf "%s\n" '/<!-- ITEM -->/a' "$(cat $tmp)" . w | ed -s $xmlfile) || (echo "Can't find ITEM anchor" && exit 1)
